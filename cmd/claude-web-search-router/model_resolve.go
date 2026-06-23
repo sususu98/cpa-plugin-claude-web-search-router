@@ -80,4 +80,3 @@ func normalizeAntigravityCapabilityModelID(modelID string) string {
 	}
 	return modelID
 }
-

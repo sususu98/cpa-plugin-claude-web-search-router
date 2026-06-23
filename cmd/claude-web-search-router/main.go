@@ -100,15 +100,15 @@ type lifecycleRequest struct {
 }
 
 type pluginConfig struct {
-	Enabled              bool     `yaml:"enabled"`
-	Route                string   `yaml:"route"`
-	AntigravityModel     string   `yaml:"antigravity_model"`
-	CodexModel           string   `yaml:"codex_model"`
-	XAIModel             string   `yaml:"xai_model"`
-	DefaultProvider      string   `yaml:"default_provider"`
-	DefaultProviderModel string   `yaml:"default_provider_model"`
-	TavilyAPIKeys        []string `yaml:"tavily_api_keys"`
-	RequireWebSearchOnly bool     `yaml:"require_web_search_only"`
+	Enabled              bool      `yaml:"enabled"`
+	Route                routeMode `yaml:"route"`
+	AntigravityModel     string    `yaml:"antigravity_model"`
+	CodexModel           string    `yaml:"codex_model"`
+	XAIModel             string    `yaml:"xai_model"`
+	DefaultProvider      string    `yaml:"default_provider"`
+	DefaultProviderModel string    `yaml:"default_provider_model"`
+	TavilyAPIKeys        []string  `yaml:"tavily_api_keys"`
+	RequireWebSearchOnly bool      `yaml:"require_web_search_only"`
 }
 
 type registration struct {
@@ -228,7 +228,7 @@ func configure(raw []byte) error {
 func defaultPluginConfig() pluginConfig {
 	return pluginConfig{
 		Enabled:              true,
-		Route:                string(backendFallback),
+		Route:                routeBuiltinDefault(),
 		RequireWebSearchOnly: true,
 	}
 }
@@ -238,7 +238,6 @@ func decodeConfig(raw []byte) (pluginConfig, error) {
 	if errUnmarshal := yaml.Unmarshal(raw, &cfg); errUnmarshal != nil {
 		return pluginConfig{}, errUnmarshal
 	}
-	cfg.Route = strings.TrimSpace(cfg.Route)
 	cfg.AntigravityModel = strings.TrimSpace(cfg.AntigravityModel)
 	cfg.CodexModel = strings.TrimSpace(cfg.CodexModel)
 	cfg.XAIModel = strings.TrimSpace(cfg.XAIModel)
@@ -265,10 +264,7 @@ func pluginRegistration() registration {
 			GitHubRepository: "https://github.com/router-for-me/CLIProxyAPI",
 			ConfigFields: []pluginapi.ConfigField{
 				{Name: "enabled", Type: pluginapi.ConfigFieldTypeBoolean, Description: "When false, the router declines all Claude web_search requests."},
-				{Name: "route", Type: pluginapi.ConfigFieldTypeEnum, EnumValues: []string{
-					string(backendFallback), string(backendAntigravityGoogle), string(backendCodexWebSearch),
-					string(backendXAIWebSearch), string(backendTavily), string(backendDefaultProvider),
-				}, Description: "Backend for Claude Code web_search. fallback (default): antigravity → codex → xai → tavily."},
+				{Name: "route", Type: pluginapi.ConfigFieldTypeString, Description: "Backend or fallback order: scalar (e.g. tavily, codex_web_search), fallback/empty for default antigravity → codex → xai → tavily, or YAML list for custom order (e.g. [tavily, codex_web_search, xai_web_search])."},
 				{Name: "antigravity_model", Type: pluginapi.ConfigFieldTypeString, Description: "Antigravity googleSearch model (empty: registry lookup, then first supports_web_search)."},
 				{Name: "codex_model", Type: pluginapi.ConfigFieldTypeString, Description: "Codex Responses model for web_search (empty defaults to gpt-5.4, never client Claude model)."},
 				{Name: "xai_model", Type: pluginapi.ConfigFieldTypeString, Description: "xAI Responses model with web_search (empty uses grok-4.3, not the client Claude model)."},
@@ -303,10 +299,10 @@ func routeModel(raw []byte) ([]byte, error) {
 	if !isClaudeCodeBuiltinWebSearchRequest(req.Body, cfg.RequireWebSearchOnly) {
 		return okEnvelope(pluginapi.ModelRouteResponse{Handled: false})
 	}
-	route := strings.TrimSpace(cfg.Route)
-	if isFallbackRoute(route) {
+	if cfg.Route.OrchestratedFallback() {
 		return okEnvelope(routeWithFallback(cfg, req.ModelRouteRequest))
 	}
+	route := cfg.Route.SingleRouteString()
 	if plans := executionPlansForRoute(cfg, req.ModelRouteRequest, route); len(plans) > 0 {
 		return okEnvelope(pluginapi.ModelRouteResponse{
 			Handled:    true,

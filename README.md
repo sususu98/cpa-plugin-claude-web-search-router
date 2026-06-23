@@ -74,7 +74,7 @@ Plugin config lives under `plugins.configs.claude-web-search-router` (key must m
 
 ### Recommended: fallback chain (default)
 
-Tries **antigravity → codex → xai → tavily**; configure `tavily_api_keys` so the last step can succeed when built-in providers are missing or unavailable.
+Tries **antigravity → codex → xai → tavily** by default; set **`route`** to a YAML list to override order. Configure `tavily_api_keys` so Tavily can succeed when built-in providers are missing or unavailable.
 
 ```yaml
 plugins:
@@ -93,6 +93,23 @@ plugins:
         # - "tvly-yyyyyyyy" # optional: round-robin
       require_web_search_only: true
 ```
+
+### Custom fallback order
+
+```yaml
+plugins:
+  configs:
+    claude-web-search-router:
+      enabled: true
+      route:
+        - tavily
+        - codex_web_search
+        - xai_web_search
+      tavily_api_keys:
+        - "tvly-xxxxxxxx"
+```
+
+Scalar `route: fallback` (or omit `route`) keeps the default **antigravity → codex → xai → tavily** order.
 
 Omit `route` to use the same default (`fallback`).
 

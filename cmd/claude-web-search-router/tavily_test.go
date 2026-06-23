@@ -199,7 +199,7 @@ func TestExecuteStreamRPCWithMockTavily(t *testing.T) {
 	defer server.Close()
 
 	currentConfig.Store(pluginConfig{
-		Route:         string(backendTavily),
+		Route:         routeMode{kind: routeModeSingle, single: string(backendTavily)},
 		TavilyAPIKeys: []string{"k"},
 	})
 	// Override client by patching: executeStream uses loadedConfig keys + real URL.

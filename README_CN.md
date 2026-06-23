@@ -14,6 +14,7 @@ Claude Code 会发带 `web_search_20250305` / `web_search_20260209` 的 Claude M
 - 同时注册 **ModelRouter + Executor**
 - 识别协议 `claude` / `anthropic` 下的 Claude Code websearch 特征
 - 默认 **fallback** 链：`antigravity → codex → xai → tavily`
+- **`route` 写成 YAML 列表** 时，按列表顺序 fallback（支持别名 `antigravity` / `codex` / `xai`；未知项会跳过并去重）
 - 单请求内对 **429 / 503 / 502** 自动换下一个后端；失败次数多的后端会在后续请求中被降权（内存 penalty，无需配置）
 - **Tavily** 路径在插件内直接搜网，并合成 Claude SSE / JSON 响应
 
@@ -58,6 +59,23 @@ plugins:
 ```
 
 不写 `route` 时默认为 `fallback`。
+
+### 自定义 fallback 顺序
+
+```yaml
+plugins:
+  configs:
+    claude-web-search-router:
+      enabled: true
+      route:
+        - tavily
+        - codex_web_search
+        - xai_web_search
+      tavily_api_keys:
+        - "tvly-xxxxxxxx"
+```
+
+`route` 为标量 `fallback`、省略、或空时，仍使用默认顺序 `antigravity → codex → xai → tavily`。
 
 ### 最小配置（主要靠 Tavily 兜底）
 
@@ -113,7 +131,6 @@ plugins:
 
 - xAI 服务端 `web_search` 文档模型为 `grok-4.3`；插件不会在 `xai_model` 为空时把 `claude-sonnet-4-6` 发给 xAI。
 - Claude 的 `allowed_domains` 经 CPA translator 可映射到 Responses `filters.allowed_domains`；`blocked_domains` → `excluded_domains` 目前**未**完整映射（以 CPA 主仓 translator 为准）。
-
 
 ## CI 与发版
 

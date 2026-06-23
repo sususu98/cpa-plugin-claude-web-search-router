@@ -16,6 +16,51 @@ func defaultWebSearchFallbackChain() []routeBackend {
 	}
 }
 
+func parseRouteBackendAlias(raw string) (routeBackend, bool) {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case string(backendAntigravityGoogle), "antigravity":
+		return backendAntigravityGoogle, true
+	case string(backendCodexWebSearch), "codex":
+		return backendCodexWebSearch, true
+	case string(backendXAIWebSearch), "xai":
+		return backendXAIWebSearch, true
+	case string(backendTavily):
+		return backendTavily, true
+	case string(backendDefaultProvider):
+		return backendDefaultProvider, true
+	case string(backendFallback):
+		return backendFallback, true
+	default:
+		return "", false
+	}
+}
+
+// normalizeFallbackChainEntries deduplicates and maps user YAML entries to route backends.
+func normalizeFallbackChainEntries(entries []string) []routeBackend {
+	var out []routeBackend
+	seen := make(map[routeBackend]struct{}, len(entries))
+	for _, entry := range entries {
+		backend, ok := parseRouteBackendAlias(entry)
+		if !ok || backend == backendFallback {
+			continue
+		}
+		if _, dup := seen[backend]; dup {
+			continue
+		}
+		seen[backend] = struct{}{}
+		out = append(out, backend)
+	}
+	return out
+}
+
+// webSearchFallbackChain returns the ordered try list for orchestrated fallback (default or route YAML list).
+func webSearchFallbackChain(cfg pluginConfig) []routeBackend {
+	if custom := cfg.Route.userOrderedBackends(); len(custom) > 0 {
+		return custom
+	}
+	return defaultWebSearchFallbackChain()
+}
+
 func isFallbackRoute(route string) bool {
 	r := strings.ToLower(strings.TrimSpace(route))
 	return r == "" || r == string(backendFallback)

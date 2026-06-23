@@ -9,7 +9,7 @@ import (
 func TestBuildExecutionPlansForExecuteRespectsRouteTavily(t *testing.T) {
 	currentConfig.Store(pluginConfig{
 		Enabled:       true,
-		Route:         string(backendTavily),
+		Route:         routeMode{kind: routeModeSingle, single: string(backendTavily)},
 		TavilyAPIKeys: []string{"tvly-test"},
 	})
 	cfg := loadedConfig()

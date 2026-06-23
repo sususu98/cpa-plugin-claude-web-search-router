@@ -1,3 +1,4 @@
-dist/
-*.h
+.codex/
 .DS_Store
+*.h
+dist/

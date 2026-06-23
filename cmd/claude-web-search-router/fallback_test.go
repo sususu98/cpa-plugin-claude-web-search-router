@@ -41,7 +41,7 @@ func TestRouteWithFallbackAntigravityFirst(t *testing.T) {
 
 	currentConfig.Store(pluginConfig{
 		Enabled: true,
-		Route:   string(backendFallback),
+		Route:   routeBuiltinDefault(),
 	})
 	raw, err := routeModel(mustJSON(t, rpcModelRouteRequest{
 		ModelRouteRequest: pluginapi.ModelRouteRequest{
@@ -63,7 +63,7 @@ func TestRouteWithFallbackAntigravityFirst(t *testing.T) {
 func TestRouteWithFallbackSkipsAntigravityToCodex(t *testing.T) {
 	currentConfig.Store(pluginConfig{
 		Enabled: true,
-		Route:   string(backendFallback),
+		Route:   routeBuiltinDefault(),
 	})
 	raw, err := routeModel(mustJSON(t, rpcModelRouteRequest{
 		ModelRouteRequest: pluginapi.ModelRouteRequest{
@@ -85,7 +85,7 @@ func TestRouteWithFallbackSkipsAntigravityToCodex(t *testing.T) {
 func TestRouteWithFallbackToTavily(t *testing.T) {
 	currentConfig.Store(pluginConfig{
 		Enabled:       true,
-		Route:         string(backendFallback),
+		Route:         routeBuiltinDefault(),
 		TavilyAPIKeys: []string{"tvly-test"},
 	})
 	raw, err := routeModel(mustJSON(t, rpcModelRouteRequest{
@@ -107,7 +107,7 @@ func TestRouteWithFallbackToTavily(t *testing.T) {
 func TestRouteWithFallbackExhausted(t *testing.T) {
 	currentConfig.Store(pluginConfig{
 		Enabled: true,
-		Route:   string(backendFallback),
+		Route:   routeBuiltinDefault(),
 	})
 	raw, err := routeModel(mustJSON(t, rpcModelRouteRequest{
 		ModelRouteRequest: pluginapi.ModelRouteRequest{

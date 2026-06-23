@@ -22,11 +22,10 @@ func buildExecutionPlans(cfg pluginConfig, req pluginapi.ModelRouteRequest) []ex
 }
 
 func buildExecutionPlansForExecute(cfg pluginConfig, req pluginapi.ModelRouteRequest) []executionPlan {
-	route := strings.TrimSpace(cfg.Route)
-	if isFallbackRoute(route) {
+	if cfg.Route.OrchestratedFallback() {
 		return buildExecutionPlansInternal(cfg, req, false)
 	}
-	return executionPlansForExecuteRoute(cfg, req, route)
+	return executionPlansForExecuteRoute(cfg, req, cfg.Route.SingleRouteString())
 }
 
 // executionPlansForExecuteRoute builds plans for plugin executor without requiring
@@ -61,7 +60,7 @@ func executionPlansForExecuteRoute(cfg pluginConfig, req pluginapi.ModelRouteReq
 
 func buildExecutionPlansInternal(cfg pluginConfig, req pluginapi.ModelRouteRequest, requireProviders bool) []executionPlan {
 	var plans []executionPlan
-	for _, backend := range defaultWebSearchFallbackChain() {
+	for _, backend := range webSearchFallbackChain(cfg) {
 		if requireProviders {
 			if _, ok := tryRouteBackend(backend, cfg, req); !ok {
 				continue
@@ -108,7 +107,7 @@ func backendRunnableLenient(backend routeBackend, cfg pluginConfig, req pluginap
 }
 
 func executionPlansForRoute(cfg pluginConfig, req pluginapi.ModelRouteRequest, route string) []executionPlan {
-	if isFallbackRoute(route) {
+	if cfg.Route.OrchestratedFallback() {
 		return buildExecutionPlans(cfg, req)
 	}
 	backend := routeBackend(strings.TrimSpace(route))
