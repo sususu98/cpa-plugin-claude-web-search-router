@@ -49,7 +49,7 @@ plugins:
       enabled: true
       priority: 20
       route: fallback
-      antigravity_model: ""   # 空：从 registry 找 supports_web_search
+      antigravity_model: "" # 空：从 registry 找 supports_web_search
       codex_model: "gpt-5.4-mini"
       xai_model: "grok-4.3"
       tavily_api_keys:
@@ -74,13 +74,13 @@ plugins:
 
 ### 固定单一后端
 
-| `route` | 说明 |
-|--------|------|
-| `antigravity_google` | 走 Antigravity 原生 googleSearch（需宿主有 antigravity 且模型可解析） |
-| `codex_web_search` | 走 Codex Responses `web_search`（默认模型 `gpt-5.4-mini`，**不会**把客户端 Claude 模型名转发给 Codex） |
-| `xai_web_search` | 走 xAI Responses `web_search`（默认 `grok-4.3`） |
-| `tavily` | 仅插件内 Tavily |
-| `default_provider` | 走 CPA 内置 `default_provider` / `default_provider_model`（无 fallback 编排） |
+| `route`              | 说明                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------ |
+| `antigravity_google` | 走 Antigravity 原生 googleSearch（需宿主有 antigravity 且模型可解析）                                  |
+| `codex_web_search`   | 走 Codex Responses `web_search`（默认模型 `gpt-5.4-mini`，**不会**把客户端 Claude 模型名转发给 Codex） |
+| `xai_web_search`     | 走 xAI Responses `web_search`（默认 `grok-4.3`）                                                       |
+| `tavily`             | 仅插件内 Tavily                                                                                        |
+| `default_provider`   | 走 CPA 内置 `default_provider` / `default_provider_model`（无 fallback 编排）                          |
 
 ## 识别规则
 
@@ -97,22 +97,36 @@ plugins:
 
 ## 配置字段
 
-| 字段 | 说明 |
-|------|------|
-| `enabled` | `false` 时对所有匹配请求返回不处理 |
-| `priority` | ModelRouter 优先级（越大越先匹配） |
-| `route` | 见上表；默认 `fallback` |
-| `antigravity_model` | Antigravity 执行模型；勿填客户端 Claude 模型名 |
-| `codex_model` | Codex 模型；空 → `gpt-5.4-mini` |
-| `xai_model` | xAI 模型；空 → `grok-4.3` |
-| `default_provider` / `default_provider_model` | 仅 `route=default_provider` |
-| `tavily_api_keys` | `tavily` 或 fallback 最后一步必填；多 key 轮询 |
-| `require_web_search_only` | `true` 更贴近 Claude Code 独占 websearch |
+| 字段                                          | 说明                                           |
+| --------------------------------------------- | ---------------------------------------------- |
+| `enabled`                                     | `false` 时对所有匹配请求返回不处理             |
+| `priority`                                    | ModelRouter 优先级（越大越先匹配）             |
+| `route`                                       | 见上表；默认 `fallback`                        |
+| `antigravity_model`                           | Antigravity 执行模型；勿填客户端 Claude 模型名 |
+| `codex_model`                                 | Codex 模型；空 → `gpt-5.4-mini`                |
+| `xai_model`                                   | xAI 模型；空 → `grok-4.3`                      |
+| `default_provider` / `default_provider_model` | 仅 `route=default_provider`                    |
+| `tavily_api_keys`                             | `tavily` 或 fallback 最后一步必填；多 key 轮询 |
+| `require_web_search_only`                     | `true` 更贴近 Claude Code 独占 websearch       |
 
 ## xAI / Codex 说明（与上游一致）
 
 - xAI 服务端 `web_search` 文档模型为 `grok-4.3`；插件不会在 `xai_model` 为空时把 `claude-sonnet-4-6` 发给 xAI。
 - Claude 的 `allowed_domains` 经 CPA translator 可映射到 Responses `filters.allowed_domains`；`blocked_domains` → `excluded_domains` 目前**未**完整映射（以 CPA 主仓 translator 为准）。
+
+
+## CI 与发版
+
+- 推送到 `main` 或开 PR：只跑 `go test` / `go vet`
+- **推送 tag `v*`（例如 `v0.1.0`）**：触发全平台构建，并自动创建 GitHub Release（含各平台 zip 与 `checksums.txt`）
+- 也可在 Actions 页手动 **Run workflow**
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+tag 必须以 **`v` 开头**（与 workflow 中 `tags: v*` 一致）。
 
 ## 开发与测试
 
