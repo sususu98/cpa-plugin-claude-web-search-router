@@ -204,19 +204,9 @@ jobs:
           if gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             gh release upload "${GITHUB_REF_NAME}" dist/*.zip dist/checksums.txt --clobber --repo "${GITHUB_REPOSITORY}"
           else
-            NOTES_FILE="$(mktemp)"
-            cat > "${NOTES_FILE}" <<EOF
-Automated release for ${GITHUB_REF_NAME}.
-
-Platforms:
-- linux amd64 / arm64 (.so)
-- darwin amd64 / arm64 (.dylib)
-- windows amd64 / arm64 (.dll)
-EOF
             gh release create "${GITHUB_REF_NAME}" dist/*.zip dist/checksums.txt \
               --repo "${GITHUB_REPOSITORY}" \
               --verify-tag \
               --title "${GITHUB_REF_NAME}" \
-              --notes-file "${NOTES_FILE}"
-            rm -f "${NOTES_FILE}"
+              --notes "Automated release for ${GITHUB_REF_NAME}. Artifacts: linux/darwin/windows amd64+arm64."
           fi
