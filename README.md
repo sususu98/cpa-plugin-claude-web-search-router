@@ -1,6 +1,6 @@
 # Claude Code Web Search Router (CPA plugin)
 
-Standalone CPA plugin repository for Claude Code built-in `web_search` requests. Layout and release workflow follow [router-for-me/cpa-plugin-gemini-cli](https://github.com/router-for-me/cpa-plugin-gemini-cli).
+Standalone CPA plugin repository. 简体中文说明见 [README_CN.md](README_CN.md). for Claude Code built-in `web_search` requests. Layout and release workflow follow [router-for-me/cpa-plugin-gemini-cli](https://github.com/router-for-me/cpa-plugin-gemini-cli).
 
 ## Capabilities
 
