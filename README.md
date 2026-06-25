@@ -225,10 +225,16 @@ plugins:
 | `tavily_api_keys` | Required for `route=tavily` or fallback last step |
 | `require_web_search_only` | `true` matches Claude Code–style exclusive `web_search` tools |
 
-## Build
+## CI and release
+
+- Push to `main` or open a PR: `go test` / `go vet` only
+- Push tag `v*` (e.g. `v0.0.3`) or **Run workflow** manually: full matrix build + GitHub Release on tags
+- Artifacts: `claude-web-search-router_<version>_<goos>_<goarch>.zip` plus `checksums.txt`
+- Matrix: **linux / darwin / windows (amd64+arm64)** and **freebsd amd64** (same as [cpa-plugin-gemini-cli](https://github.com/router-for-me/cpa-plugin-gemini-cli))
 
 ```bash
-make -C examples/plugin bin/claude-web-search-router-go.dylib
+git tag v0.0.3
+git push origin v0.0.3
 ```
 
-Use `.so` on Linux and `.dll` on Windows. Point `plugins.path` at the built artifact.
+Local build (see top of this file): `CGO_ENABLED=1 go build -buildmode=c-shared` → `.dylib` / `.so` / `.dll`. Point `plugins.path` at the artifact.
