@@ -136,6 +136,7 @@ plugins:
 
 - 推送到 `main` 或开 PR：只跑 `go test` / `go vet`
 - **推送 tag `v*`（例如 `v0.1.0`）**：触发全平台构建，并自动创建 GitHub Release（含各平台 zip 与 `checksums.txt`）
+- 矩阵含 **linux / darwin / windows（amd64+arm64）** 与 **freebsd amd64**（与 [cpa-plugin-gemini-cli](https://github.com/router-for-me/cpa-plugin-gemini-cli) 一致）
 - 也可在 Actions 页手动 **Run workflow**
 
 ```bash
